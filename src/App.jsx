@@ -1,247 +1,318 @@
-import React from 'react';
+import React, { useState } from 'react';
+import classNames from 'classnames';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import categoriesFromServer from './api/categories';
-// import productsFromServer from './api/products';
+import usersFromServer from './api/users';
+import categoriesFromServer from './api/categories';
+import productsFromServer from './api/products';
 
-// const products = productsFromServer.map((product) => {
-//   const category = null; // find by product.categoryId
-//   const user = null; // find by category.ownerId
+const SORT_ORDER_ASC = 'asc';
+const SORT_ORDER_DESC = 'desc';
 
-//   return null;
-// });
+const sortingKeys = [
+  { name: 'ID', sortingKey: 'id' },
+  { name: 'Product', sortingKey: 'name' },
+  { name: 'Category', sortingKey: 'category' },
+  { name: 'User', sortingKey: 'userName' },
+];
 
-export const App = () => (
-  <div className="section">
-    <div className="container">
-      <h1 className="title">Product Categories</h1>
+const products = productsFromServer.map((product) => {
+  const category = categoriesFromServer.find(
+    categoryFromServer => product.categoryId === categoryFromServer.id,
+  );
+  const user = usersFromServer.find(
+    userFromServer => category.ownerId === userFromServer.id,
+  );
 
-      <div className="block">
-        <nav className="panel">
-          <p className="panel-heading">Filters</p>
+  return {
+    ...product,
+    category: category.title,
+    icon: category.icon,
+    userName: user.name,
+    userSex: user.sex,
+  };
+});
 
-          <p className="panel-tabs has-text-weight-bold">
-            <a
-              data-cy="FilterAllUsers"
-              href="#/"
-            >
-              All
-            </a>
+function getFilteredProducts(
+  productsToFilter, user, filterByProduct, categories,
+) {
+  let filteredProducts = [...productsToFilter];
 
-            <a
-              data-cy="FilterUser"
-              href="#/"
-            >
-              User 1
-            </a>
+  if (user) {
+    filteredProducts = filteredProducts.filter(
+      product => product.userName === user,
+    );
+  }
 
-            <a
-              data-cy="FilterUser"
-              href="#/"
-              className="is-active"
-            >
-              User 2
-            </a>
+  if (filterByProduct) {
+    filteredProducts = filteredProducts.filter(
+      product => product.name
+        .toLowerCase()
+        .includes(filterByProduct.toLowerCase()),
+    );
+  }
 
-            <a
-              data-cy="FilterUser"
-              href="#/"
-            >
-              User 3
-            </a>
-          </p>
+  if (categories.length) {
+    filteredProducts = filteredProducts.filter(
+      product => categories.includes(product.category),
+    );
+  }
 
-          <div className="panel-block">
-            <p className="control has-icons-left has-icons-right">
-              <input
-                data-cy="SearchField"
-                type="text"
-                className="input"
-                placeholder="Search"
-                value="qwe"
-              />
+  return filteredProducts;
+}
 
-              <span className="icon is-left">
-                <i className="fas fa-search" aria-hidden="true" />
-              </span>
+function getSortedProducts(
+  productsToSort, sortKey, sortOrder,
+) {
+  if (sortKey) {
+    switch (sortKey) {
+      case 'name':
+      case 'category':
+      case 'userName':
+        productsToSort.sort(
+          (a, b) => a[sortKey].localeCompare(b[sortKey]),
+        );
+        break;
 
-              <span className="icon is-right">
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                <button
-                  data-cy="ClearButton"
-                  type="button"
-                  className="delete"
-                />
-              </span>
+      case 'id':
+        productsToSort.sort(
+          (a, b) => a.id - b.id,
+        );
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return sortOrder === SORT_ORDER_DESC
+    ? productsToSort.reverse()
+    : productsToSort;
+}
+
+export const App = () => {
+  const [selectedUser, setSelectedUser] = useState('');
+  const [filterByProduct, setFilterByProduct] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [sortKey, setSortKey] = useState('');
+  const [sortOrder, setSortOrder] = useState('');
+  const filteredProducts = getFilteredProducts(
+    products, selectedUser, filterByProduct, selectedCategories,
+  );
+
+  getSortedProducts(filteredProducts, sortKey, sortOrder);
+
+  const resetAllFilters = () => {
+    setSelectedUser('');
+    setFilterByProduct('');
+    setSelectedCategories([]);
+  };
+
+  return (
+    <div className="section">
+      <div className="container">
+        <h1 className="title">Product Categories</h1>
+
+        <div className="block">
+          <nav className="panel">
+            <p className="panel-heading">Filters</p>
+
+            <p className="panel-tabs has-text-weight-bold">
+              <a
+                data-cy="FilterAllUsers"
+                href="#/"
+                className={classNames({
+                  'is-active': selectedUser === '',
+                })}
+                onClick={() => setSelectedUser('')}
+              >
+                All
+              </a>
+
+              {usersFromServer.map(user => (
+                <a
+                  key={user.id}
+                  data-cy="FilterUser"
+                  href="#/"
+                  className={classNames({
+                    'is-active': user.name === selectedUser,
+                  })}
+                  onClick={() => setSelectedUser(user.name)}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
-          </div>
 
-          <div className="panel-block is-flex-wrap-wrap">
-            <a
-              href="#/"
-              data-cy="AllCategories"
-              className="button is-success mr-6 is-outlined"
-            >
-              All
-            </a>
+            <div className="panel-block">
+              <p className="control has-icons-left has-icons-right">
+                <input
+                  data-cy="SearchField"
+                  type="text"
+                  className="input"
+                  placeholder="Search"
+                  value={filterByProduct}
+                  onChange={event => setFilterByProduct(event.target.value)}
+                />
 
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1 is-info"
-              href="#/"
-            >
-              Category 1
-            </a>
-
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1"
-              href="#/"
-            >
-              Category 2
-            </a>
-
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1 is-info"
-              href="#/"
-            >
-              Category 3
-            </a>
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1"
-              href="#/"
-            >
-              Category 4
-            </a>
-          </div>
-
-          <div className="panel-block">
-            <a
-              data-cy="ResetAllButton"
-              href="#/"
-              className="button is-link is-outlined is-fullwidth"
-            >
-              Reset all filters
-            </a>
-          </div>
-        </nav>
-      </div>
-
-      <div className="box table-container">
-        <p data-cy="NoMatchingMessage">
-          No products matching selected criteria
-        </p>
-
-        <table
-          data-cy="ProductTable"
-          className="table is-striped is-narrow is-fullwidth"
-        >
-          <thead>
-            <tr>
-              <th>
-                <span className="is-flex is-flex-wrap-nowrap">
-                  ID
-
-                  <a href="#/">
-                    <span className="icon">
-                      <i data-cy="SortIcon" className="fas fa-sort" />
-                    </span>
-                  </a>
+                <span className="icon is-left">
+                  <i className="fas fa-search" aria-hidden="true" />
                 </span>
-              </th>
 
-              <th>
-                <span className="is-flex is-flex-wrap-nowrap">
-                  Product
+                {filterByProduct.length > 0 && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={() => setFilterByProduct('')}
+                    />
+                  </span>
+                )}
+              </p>
+            </div>
 
-                  <a href="#/">
-                    <span className="icon">
-                      <i data-cy="SortIcon" className="fas fa-sort-down" />
-                    </span>
-                  </a>
-                </span>
-              </th>
-
-              <th>
-                <span className="is-flex is-flex-wrap-nowrap">
-                  Category
-
-                  <a href="#/">
-                    <span className="icon">
-                      <i data-cy="SortIcon" className="fas fa-sort-up" />
-                    </span>
-                  </a>
-                </span>
-              </th>
-
-              <th>
-                <span className="is-flex is-flex-wrap-nowrap">
-                  User
-
-                  <a href="#/">
-                    <span className="icon">
-                      <i data-cy="SortIcon" className="fas fa-sort" />
-                    </span>
-                  </a>
-                </span>
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                1
-              </td>
-
-              <td data-cy="ProductName">Milk</td>
-              <td data-cy="ProductCategory">🍺 - Drinks</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
+            <div className="panel-block is-flex-wrap-wrap">
+              <a
+                href="#/"
+                data-cy="AllCategories"
+                className={classNames('button', 'is-success', 'mr-6', {
+                  'is-outlined': selectedCategories.length > 0,
+                })}
+                onClick={() => setSelectedCategories([])}
               >
-                Max
-              </td>
-            </tr>
+                All
+              </a>
 
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                2
-              </td>
+              {categoriesFromServer.map(category => (
+                <a
+                  key={category.id}
+                  data-cy="Category"
+                  className={classNames('button', 'mr-2', 'my-1', {
+                    'is-info': selectedCategories.includes(category.title),
+                  })}
+                  href="#/"
+                  onClick={() => {
+                    if (selectedCategories.includes(category.title)) {
+                      setSelectedCategories(
+                        selectedCategories.filter(
+                          selectCategory => selectCategory !== category.title,
+                        ),
+                      );
+                    } else {
+                      setSelectedCategories([
+                        ...selectedCategories,
+                        category.title,
+                      ]);
+                    }
+                  }}
+                >
+                  {category.title}
+                </a>
+              ))}
+            </div>
 
-              <td data-cy="ProductName">Bread</td>
-              <td data-cy="ProductCategory">🍞 - Grocery</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-danger"
+            <div className="panel-block">
+              <a
+                data-cy="ResetAllButton"
+                href="#/"
+                className="button is-link is-outlined is-fullwidth"
+                onClick={() => resetAllFilters()}
               >
-                Anna
-              </td>
-            </tr>
+                Reset all filters
+              </a>
+            </div>
+          </nav>
+        </div>
 
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                3
-              </td>
+        <div className="box table-container">
+          {filteredProducts.length === 0 && (
+            <p data-cy="NoMatchingMessage">
+              No products matching selected criteria
+            </p>
+          )}
 
-              <td data-cy="ProductName">iPhone</td>
-              <td data-cy="ProductCategory">💻 - Electronics</td>
+          <table
+            data-cy="ProductTable"
+            className="table is-striped is-narrow is-fullwidth"
+          >
+            {filteredProducts.length > 0 && (
+              <thead>
+                <tr>
+                  {sortingKeys.map((sortingKey) => {
+                    const isKeySelected = sortKey === sortingKey.sortingKey;
 
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Roma
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                    return (
+                      <th key={sortingKey.sortingKey}>
+                        <span className="is-flex is-flex-wrap-nowrap">
+                          {sortingKey.name}
+
+                          <a
+                            href="#/"
+                            onClick={() => {
+                              if (sortOrder === SORT_ORDER_DESC
+                                && isKeySelected) {
+                                setSortOrder('');
+                                setSortKey('');
+                              } else if (sortOrder === SORT_ORDER_ASC
+                                && isKeySelected) {
+                                setSortOrder(SORT_ORDER_DESC);
+                              } else {
+                                setSortKey(sortingKey.sortingKey);
+                                setSortOrder(SORT_ORDER_ASC);
+                              }
+                            }}
+                          >
+                            <span className="icon">
+                              <i
+                                data-cy="SortIcon"
+                                className={classNames('fas', {
+                                  'fa-sort': !isKeySelected,
+                                  'fa-sort-up': sortOrder === SORT_ORDER_ASC
+                                    && isKeySelected,
+                                  'fa-sort-down': sortOrder === SORT_ORDER_DESC
+                                    && isKeySelected,
+                                })}
+                              />
+                            </span>
+                          </a>
+                        </span>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+            )}
+
+            <tbody>
+              {filteredProducts.map(product => (
+                <tr data-cy="Product" key={product.id}>
+                  <td className="has-text-weight-bold" data-cy="ProductId">
+                    {product.id}
+                  </td>
+
+                  <td data-cy="ProductName">{product.name}</td>
+
+                  <td data-cy="ProductCategory">
+                    {`${product.icon} - ${product.category}`}
+                  </td>
+
+                  <td
+                    data-cy="ProductUser"
+                    className={classNames({
+                      'has-text-link': product.userSex === 'm',
+                      'has-text-danger': product.userSex === 'f',
+                    })}
+                  >
+                    {product.userName}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
