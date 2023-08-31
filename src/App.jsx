@@ -1,9 +1,10 @@
 import React from 'react';
+import cn from 'classnames';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import categoriesFromServer from './api/categories';
-// import productsFromServer from './api/products';
+import usersFromServer from './api/users';
+import categoriesFromServer from './api/categories';
+import productsFromServer from './api/products';
 
 // const products = productsFromServer.map((product) => {
 //   const category = null; // find by product.categoryId
@@ -28,28 +29,15 @@ export const App = () => (
             >
               All
             </a>
-
-            <a
-              data-cy="FilterUser"
-              href="#/"
-            >
-              User 1
-            </a>
-
-            <a
-              data-cy="FilterUser"
-              href="#/"
-              className="is-active"
-            >
-              User 2
-            </a>
-
-            <a
-              data-cy="FilterUser"
-              href="#/"
-            >
-              User 3
-            </a>
+            {usersFromServer.map(user => (
+              <a
+                key={user.id}
+                data-cy="FilterUser"
+                href="#/"
+              >
+                {user.name}
+              </a>
+            ))}
           </p>
 
           <div className="panel-block">
@@ -86,36 +74,17 @@ export const App = () => (
               All
             </a>
 
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1 is-info"
-              href="#/"
-            >
-              Category 1
-            </a>
+            {categoriesFromServer.map(cat => (
+              <a
+                key={cat.id}
+                data-cy="Category"
+                className="button mr-2 my-1 is-info"
+                href="#/"
+              >
+                {`Category ${cat.id}`}
+              </a>
+            ))}
 
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1"
-              href="#/"
-            >
-              Category 2
-            </a>
-
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1 is-info"
-              href="#/"
-            >
-              Category 3
-            </a>
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1"
-              href="#/"
-            >
-              Category 4
-            </a>
           </div>
 
           <div className="panel-block">
@@ -192,53 +161,39 @@ export const App = () => (
           </thead>
 
           <tbody>
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                1
-              </td>
+            {productsFromServer.map((product) => {
+              const equalCotegory = categoriesFromServer
+                .find(cat => cat.id === product.categoryId);
+              const owner = usersFromServer
+                .find(person => person.id === equalCotegory.ownerId);
 
-              <td data-cy="ProductName">Milk</td>
-              <td data-cy="ProductCategory">🍺 - Drinks</td>
+              return (
+                <tr data-cy="Product">
+                  <td className="has-text-weight-bold" data-cy="ProductId">
+                    {product.id}
+                  </td>
 
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Max
-              </td>
-            </tr>
+                  <td data-cy="ProductName">
+                    {product.name}
+                  </td>
 
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                2
-              </td>
+                  <td data-cy="ProductCategory">
+                    {`${equalCotegory.icon} - ${equalCotegory.title}`}
+                  </td>
 
-              <td data-cy="ProductName">Bread</td>
-              <td data-cy="ProductCategory">🍞 - Grocery</td>
+                  <td
+                    data-cy="ProductUser"
+                    className={cn(
+                      { 'has-text-link': owner.sex === 'm' },
+                      { 'has-text-danger': owner.sex === 'f' },
+                    )}
+                  >
+                    {owner.name}
+                  </td>
+                </tr>
 
-              <td
-                data-cy="ProductUser"
-                className="has-text-danger"
-              >
-                Anna
-              </td>
-            </tr>
-
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                3
-              </td>
-
-              <td data-cy="ProductName">iPhone</td>
-              <td data-cy="ProductCategory">💻 - Electronics</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Roma
-              </td>
-            </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
