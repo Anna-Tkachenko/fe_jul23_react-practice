@@ -11,9 +11,9 @@ const SORT_ORDER_DESC = 'desc';
 
 const sortingKeys = [
   { name: 'ID', sortingKey: 'id' },
-  { name: 'Product', sortingKey: 'product' },
+  { name: 'Product', sortingKey: 'name' },
   { name: 'Category', sortingKey: 'category' },
-  { name: 'User', sortingKey: 'user' },
+  { name: 'User', sortingKey: 'userName' },
 ];
 
 const products = productsFromServer.map((product) => {
@@ -61,6 +61,35 @@ function getFilteredProducts(
   return filteredProducts;
 }
 
+function getSortedProducts(
+  productsToSort, sortKey, sortOrder,
+) {
+  if (sortKey) {
+    switch (sortKey) {
+      case 'name':
+      case 'category':
+      case 'userName':
+        productsToSort.sort(
+          (a, b) => a[sortKey].localeCompare(b[sortKey]),
+        );
+        break;
+
+      case 'id':
+        productsToSort.sort(
+          (a, b) => a.id - b.id,
+        );
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return sortOrder === SORT_ORDER_DESC
+    ? productsToSort.reverse()
+    : productsToSort;
+}
+
 export const App = () => {
   const [selectedUser, setSelectedUser] = useState('');
   const [filterByProduct, setFilterByProduct] = useState('');
@@ -70,6 +99,8 @@ export const App = () => {
   const filteredProducts = getFilteredProducts(
     products, selectedUser, filterByProduct, selectedCategories,
   );
+
+  getSortedProducts(filteredProducts, sortKey, sortOrder);
 
   const resetAllFilters = () => {
     setSelectedUser('');
@@ -236,8 +267,8 @@ export const App = () => {
                             <span className="icon">
                               <i
                                 data-cy="SortIcon"
-                                className={classNames('fas', 'fa-sort', {
-                                  // 'fa-sort': sortKey === '',
+                                className={classNames('fas', {
+                                  'fa-sort': !isKeySelected,
                                   'fa-sort-up': sortOrder === SORT_ORDER_ASC
                                     && isKeySelected,
                                   'fa-sort-down': sortOrder === SORT_ORDER_DESC
