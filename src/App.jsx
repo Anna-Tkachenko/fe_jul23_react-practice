@@ -19,7 +19,7 @@ const products = productsFromServer.map((product) => {
   };
 });
 
-const filterByUserName = (userId = '', searchValue = '') => {
+const filterData = (userId, searchValue, selectedCategories) => {
   let filteredProducts = [...products];
 
   if (userId) {
@@ -38,14 +38,30 @@ const filterByUserName = (userId = '', searchValue = '') => {
     ));
   }
 
+  if (selectedCategories.length !== 0) {
+    filteredProducts = products.filter(({ category, user, name }) => (
+      selectedCategories.includes(category.title)
+      && user.id === userId
+      && name
+        .toLowerCase()
+        .trim()
+        .includes(searchValue.toLowerCase().trim())
+    ));
+  }
+
   return filteredProducts;
 };
 
 export const App = () => {
   const [selectedUserId, setSelectedUserId] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchValue, setSearchValue] = useState('');
 
-  const productsToRender = filterByUserName(selectedUserId, searchValue);
+  const productsToRender = filterData(
+    selectedUserId,
+    searchValue,
+    selectedCategories,
+  );
 
   return (
     <div className="section">
@@ -121,41 +137,41 @@ export const App = () => {
               <a
                 href="#/"
                 data-cy="AllCategories"
-                className="button is-success mr-6 is-outlined"
+                className={cn('button is-success mr-6', {
+                  'is-outlined': selectedCategories.length,
+                })}
+                onClick={() => setSelectedCategories([])}
               >
                 All
               </a>
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 1
-              </a>
+              {categoriesFromServer.map(category => (
+                <a
+                  data-cy="Category"
+                  className={cn('button mr-2 my-1', {
+                    'is-info': selectedCategories.includes(category.title),
+                  })}
+                  href="#/"
+                  key={category.id}
+                  onClick={() => {
+                    if (!selectedCategories.includes(category.title)) {
+                      setSelectedCategories(prevCategories => (
+                        [...prevCategories, category.title]
+                      ));
+                    } else {
+                      const selectedCategoriesCopy = [...selectedCategories];
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 2
-              </a>
+                      selectedCategoriesCopy.splice(
+                        selectedCategoriesCopy.indexOf(category.title), 1,
+                      );
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 3
-              </a>
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 4
-              </a>
+                      setSelectedCategories(selectedCategoriesCopy);
+                    }
+                  }}
+                >
+                  {category.title}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
@@ -166,6 +182,7 @@ export const App = () => {
                 onClick={() => {
                   setSearchValue('');
                   setSelectedUserId('');
+                  setSelectedCategories([]);
                 }}
               >
                 Reset all filters
