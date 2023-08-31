@@ -1,16 +1,28 @@
 import React from 'react';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import categoriesFromServer from './api/categories';
-// import productsFromServer from './api/products';
+import usersFromServer from './api/users';
+import categoriesFromServer from './api/categories';
+import productsFromServer from './api/products';
 
-// const products = productsFromServer.map((product) => {
-//   const category = null; // find by product.categoryId
-//   const user = null; // find by category.ownerId
+import { ProductList } from './component/ProductList/ProductList';
 
-//   return null;
-// });
+const products = productsFromServer.map((product) => {
+  const category = categoriesFromServer.find(({ id }) => product.categoryId
+    === id) || null;
+  const user = usersFromServer.find(({ id }) => id === category.ownerId)
+  || null;
+
+  return {
+    ...product,
+    categoryIcon: category.icon,
+    categoryTitle: category.title,
+    categoryId: category.id,
+    userName: user.name,
+    userId: user.id,
+    userSex: user.sex,
+  };
+});
 
 export const App = () => (
   <div className="section">
@@ -191,7 +203,9 @@ export const App = () => (
             </tr>
           </thead>
 
-          <tbody>
+          <ProductList products={products} />
+
+          {/* <tbody>
             <tr data-cy="Product">
               <td className="has-text-weight-bold" data-cy="ProductId">
                 1
@@ -239,7 +253,7 @@ export const App = () => (
                 Roma
               </td>
             </tr>
-          </tbody>
+          </tbody> */}
         </table>
       </div>
     </div>
