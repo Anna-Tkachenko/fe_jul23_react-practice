@@ -74,21 +74,19 @@ export const App = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={searchValue}
+                  onChange={event => setSearchValue(event.target.value)}
                 />
-
-                <span className="icon is-left">
-                  <i className="fas fa-search" aria-hidden="true" />
-                </span>
-
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    data-cy="ClearButton"
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {searchValue && (
+                  <span className="icon is-right">
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={() => setSearchValue('')}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
