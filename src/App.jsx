@@ -16,14 +16,14 @@ export const App = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchValue, setSearchValue] = useState('');
 
-  const filteredProducts = productsFromServer.filter(product => {
-    const user = usersFromServer.find(u => u.id === product.id);
+  const filteredProducts = productsFromServer.filter((product) => {
+    const user = usersFromServer.find(u => u.id === product.userId);
     const category = categoriesFromServer
       .find(c => c.id === product.categoryId);
 
     if ((!selectedUser || user.id === selectedUser)
-      && (!searchValue || product.name
-        .toLowerCase().includes(searchValue().toLowerCase()))
+      && (!searchValue
+        || product.name.toLowerCase().includes(searchValue.toLowerCase()))
     ) {
       return true;
     }
@@ -44,31 +44,27 @@ export const App = () => {
               <a
                 data-cy="FilterAllUsers"
                 href="#/"
+                className={!selectedUser ? 'is-active' : ''}
+                onClick={() => setSelectedUser(null)}
               >
                 All
               </a>
 
-              <a
-                data-cy="FilterUser"
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                data-cy="FilterUser"
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                data-cy="FilterUser"
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  key={user.id}
+                  data-cy="FilterUser"
+                  href="#/"
+                  className={selectedUser === user.id ? 'is-active' : ''}
+                  onClick={() => setSelectedUser(user.id)}
+                >
+                  {user.gender === 'm' ? (
+                    <span className="has-text-link">{user.name}</span>
+                  ) : (
+                    <span className="has-text-danger">{user.name}</span>
+                  )}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
