@@ -14,12 +14,14 @@ const preparedProducts = productsFromServer.map(product => ({
     .find(categ => categ.id === product.categoryId).ownerId), // find by category.ownerId
 }));
 
+// console.log(preparedProducts);
+
 function filterProducts(products, userSelected) {
   let filteredProducts = products;
 
   if (userSelected !== '') {
     filteredProducts = filteredProducts
-      .filter();
+      .filter(product => product.user.id === userSelected);
   }
 
   return filteredProducts;
@@ -28,7 +30,7 @@ function filterProducts(products, userSelected) {
 export const App = () => {
   const [userSelected, setUserSelected] = useState('');
   const allUsersFilter = () => setUserSelected('');
-  // const UserFilter = () => setUserSelected(usersFromServer[0].id);
+  // const userFilter = value => setUserSelected(value);
   // const annaUserFilter = () => setUserSelected(usersFromServer[1].id);
   // const maxUserFilter = () => setUserSelected(usersFromServer[2].id);
   // const johnUserFilter = () => setUserSelected(usersFromServer[3].id);
@@ -56,7 +58,7 @@ export const App = () => {
               {usersFromServer.map(user => (
                 <a
                   key={user.name}
-                  // onClick={}
+                  // onClick={userFilter(user.id)}
                   data-cy="FilterUser"
                   href="#/"
                   className="is-active"
