@@ -1,0 +1,14 @@
+export const UserCard = ({ user }) => {
+  const {
+    name,
+  } = user;
+
+  return (
+    <a
+      data-cy="FilterUser"
+      href="#/"
+    >
+      {name}
+    </a>
+  );
+};

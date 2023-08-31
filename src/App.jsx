@@ -1,9 +1,11 @@
-import React from 'react';
+// import React, { useState } from 'react';
 import './App.scss';
+// import cn from 'classnames';
 
-// import usersFromServer from './api/users';
-// import categoriesFromServer from './api/categories';
-// import productsFromServer from './api/products';
+import users from './api/users';
+import categories from './api/categories';
+import products from './api/products';
+import { ProductsList } from './components/ProductsList';
 
 // const products = productsFromServer.map((product) => {
 //   const category = null; // find by product.categoryId
@@ -11,13 +13,30 @@ import './App.scss';
 
 //   return null;
 // });
+// const
+
+// function filterByOwner(users, { sortField }) {
+//   const copiedUsers = [...users];
+
+//   if (sortField) {
+//     copiedUsers.sort((user1, user2) => {
+//       switch(sortField){
+//         case
+//         default:
+//           return 0;
+//       }
+//     })
+//   }
+// }
 
 export const App = () => (
+  // const [selectedUser, setSelectedUser] = useState(null);
+  // const [sortField, setSortField] = useState('');
   <div className="section">
     <div className="container">
       <h1 className="title">Product Categories</h1>
 
-      <div className="block">
+      {/* <div className="block">
         <nav className="panel">
           <p className="panel-heading">Filters</p>
 
@@ -64,18 +83,18 @@ export const App = () => (
 
               <span className="icon is-left">
                 <i className="fas fa-search" aria-hidden="true" />
-              </span>
+              </span> */}
 
-              <span className="icon is-right">
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                <button
-                  data-cy="ClearButton"
-                  type="button"
-                  className="delete"
-                />
-              </span>
-            </p>
-          </div>
+      {/* <span className="icon is-right"> */}
+      {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+      {/* <button
+            data-cy="ClearButton"
+            type="button"
+            className="delete"
+          />
+        </span>
+      </p>
+    </div>
 
           <div className="panel-block is-flex-wrap-wrap">
             <a
@@ -189,59 +208,17 @@ export const App = () => (
                 </span>
               </th>
             </tr>
-          </thead>
+          </thead> */}
 
-          <tbody>
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                1
-              </td>
-
-              <td data-cy="ProductName">Milk</td>
-              <td data-cy="ProductCategory">🍺 - Drinks</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Max
-              </td>
-            </tr>
-
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                2
-              </td>
-
-              <td data-cy="ProductName">Bread</td>
-              <td data-cy="ProductCategory">🍞 - Grocery</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-danger"
-              >
-                Anna
-              </td>
-            </tr>
-
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                3
-              </td>
-
-              <td data-cy="ProductName">iPhone</td>
-              <td data-cy="ProductCategory">💻 - Electronics</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Roma
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <tbody>
+        <ProductsList
+          categories={categories}
+          products={products}
+          users={users}
+        />
+      </tbody>
+      {/* </table> */}
     </div>
   </div>
+  // </div>
 );
