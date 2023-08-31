@@ -1,16 +1,33 @@
+/* eslint-disable */
 import React from 'react';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import categoriesFromServer from './api/categories';
-// import productsFromServer from './api/products';
+import usersFromServer from './api/users';
+import categoriesFromServer from './api/categories';
+import productsFromServer from './api/products';
 
-// const products = productsFromServer.map((product) => {
-//   const category = null; // find by product.categoryId
-//   const user = null; // find by category.ownerId
+function getCategoryIcon(categoryId) {
+  const category = categoriesFromServer.find(cat => cat.id === categoryId);
 
-//   return null;
-// });
+  return category ? category.icon : '';
+}
+
+function getUserColor(gender) {
+  return gender === 'male' ? 'has-text-link' : 'has-text-danger';
+}
+
+const preparedProducts = productsFromServer.map((product) => {
+  const category = categoriesFromServer.find(cat => cat.id === product.categoryId);
+  const user = usersFromServer.find(user => user.id === product.ownerId);
+
+  return {
+    ...product,
+    categoryName: category ? category.name : 'Unknown Category',
+    categoryIcon: getCategoryIcon(product.categoryId),
+    userName: user ? user.name : 'Unknown User',
+    userColor: getUserColor(user ? user.gender : ''),
+  };
+});
 
 export const App = () => (
   <div className="section">
@@ -91,31 +108,9 @@ export const App = () => (
               className="button mr-2 my-1 is-info"
               href="#/"
             >
-              Category 1
+              {category}
             </a>
 
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1"
-              href="#/"
-            >
-              Category 2
-            </a>
-
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1 is-info"
-              href="#/"
-            >
-              Category 3
-            </a>
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1"
-              href="#/"
-            >
-              Category 4
-            </a>
           </div>
 
           <div className="panel-block">
@@ -141,104 +136,35 @@ export const App = () => (
         >
           <thead>
             <tr>
-              <th>
-                <span className="is-flex is-flex-wrap-nowrap">
-                  ID
-
-                  <a href="#/">
-                    <span className="icon">
-                      <i data-cy="SortIcon" className="fas fa-sort" />
-                    </span>
-                  </a>
-                </span>
-              </th>
-
-              <th>
-                <span className="is-flex is-flex-wrap-nowrap">
-                  Product
-
-                  <a href="#/">
-                    <span className="icon">
-                      <i data-cy="SortIcon" className="fas fa-sort-down" />
-                    </span>
-                  </a>
-                </span>
-              </th>
-
-              <th>
-                <span className="is-flex is-flex-wrap-nowrap">
-                  Category
-
-                  <a href="#/">
-                    <span className="icon">
-                      <i data-cy="SortIcon" className="fas fa-sort-up" />
-                    </span>
-                  </a>
-                </span>
-              </th>
-
-              <th>
-                <span className="is-flex is-flex-wrap-nowrap">
-                  User
-
-                  <a href="#/">
-                    <span className="icon">
-                      <i data-cy="SortIcon" className="fas fa-sort" />
-                    </span>
-                  </a>
-                </span>
-              </th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Owner</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                1
-              </td>
-
-              <td data-cy="ProductName">Milk</td>
-              <td data-cy="ProductCategory">🍺 - Drinks</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Max
-              </td>
-            </tr>
-
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                2
-              </td>
-
-              <td data-cy="ProductName">Bread</td>
-              <td data-cy="ProductCategory">🍞 - Grocery</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-danger"
-              >
-                Anna
-              </td>
-            </tr>
-
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                3
-              </td>
-
-              <td data-cy="ProductName">iPhone</td>
-              <td data-cy="ProductCategory">💻 - Electronics</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Roma
-              </td>
-            </tr>
+            {preparedProducts.map(product => (
+              <tr key={product.id} data-cy="Product">
+                <td className="has-text-weight-bold" data-cy="ProductId">
+                  {product.id}
+                </td>
+                <td data-cy="ProductName">{product.name}</td>
+                <td data-cy="ProductCategory">
+                  {product.categoryIcon && (
+                  <span role="img" aria-label="Category Icon">
+                    {product.categoryIcon}
+                  </span>
+                  )}
+                  {product.categoryName}
+                </td>
+                <td
+                  data-cy="ProductUser"
+                  className={product.userColor}
+                >
+                  {product.userName}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
