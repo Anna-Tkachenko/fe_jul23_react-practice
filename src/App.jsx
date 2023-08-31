@@ -1,9 +1,9 @@
-import React from 'react';
+// import React, { useState } from 'react';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import categoriesFromServer from './api/categories';
-// import productsFromServer from './api/products';
+import usersFromServer from './api/users';
+import categoriesFromServer from './api/categories';
+import productsFromServer from './api/products';
 
 // const products = productsFromServer.map((product) => {
 //   const category = null; // find by product.categoryId
@@ -11,6 +11,8 @@ import './App.scss';
 
 //   return null;
 // });
+// const [sortField, setSortField] = useState('');
+// const [query, setQuery] = useState('');
 
 export const App = () => (
   <div className="section">
@@ -28,28 +30,14 @@ export const App = () => (
             >
               All
             </a>
-
-            <a
-              data-cy="FilterUser"
-              href="#/"
-            >
-              User 1
-            </a>
-
-            <a
-              data-cy="FilterUser"
-              href="#/"
-              className="is-active"
-            >
-              User 2
-            </a>
-
-            <a
-              data-cy="FilterUser"
-              href="#/"
-            >
-              User 3
-            </a>
+            {usersFromServer.map(user => (
+              <a
+                data-cy="FilterUser"
+                href="#/"
+              >
+                {user.name}
+              </a>
+            ))}
           </p>
 
           <div className="panel-block">
@@ -60,6 +48,9 @@ export const App = () => (
                 className="input"
                 placeholder="Search"
                 value="qwe"
+                onChange={(event) => {
+                  // setQuery(event.currentTarget.value);
+                }}
               />
 
               <span className="icon is-left">
@@ -192,53 +183,26 @@ export const App = () => (
           </thead>
 
           <tbody>
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                1
-              </td>
 
-              <td data-cy="ProductName">Milk</td>
-              <td data-cy="ProductCategory">🍺 - Drinks</td>
+            {productsFromServer.map(product => (
+              <tr data-cy="Product">
+                <td className="has-text-weight-bold" data-cy="ProductId">
+                  {product.id}
+                </td>
 
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Max
-              </td>
-            </tr>
+                <td data-cy="ProductName">{product.name}</td>
+                {categoriesFromServer.map((categori) => {
+                  if (categori.id === product.categoryId) {
+                    return (
+                      <td data-cy="ProductCategory">{`${categori.icon} - ${categori.title}`}</td>
+                    );
+                  }
 
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                2
-              </td>
-
-              <td data-cy="ProductName">Bread</td>
-              <td data-cy="ProductCategory">🍞 - Grocery</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-danger"
-              >
-                Anna
-              </td>
-            </tr>
-
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                3
-              </td>
-
-              <td data-cy="ProductName">iPhone</td>
-              <td data-cy="ProductCategory">💻 - Electronics</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Roma
-              </td>
-            </tr>
+                  return null;
+                })
+                }
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
