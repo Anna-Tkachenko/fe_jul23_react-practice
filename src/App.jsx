@@ -1,16 +1,65 @@
 import React from 'react';
 import './App.scss';
+import cn from 'classnames';
 
-// import usersFromServer from './api/users';
-// import categoriesFromServer from './api/categories';
-// import productsFromServer from './api/products';
+import usersFromServer from './api/users';
+import categoriesFromServer from './api/categories';
+import productsFromServer from './api/products';
 
-// const products = productsFromServer.map((product) => {
-//   const category = null; // find by product.categoryId
-//   const user = null; // find by category.ownerId
+export const products = productsFromServer.map((product) => {
+  const category = categoriesFromServer
+    .find(({ id }) => id === product.categoryId);
+  const owner = usersFromServer.find(({ id }) => id === category.ownerId);
 
-//   return null;
-// });
+  return {
+    id: product.id,
+    productName: product.name,
+    category,
+    owner,
+  };
+});
+
+const Product = ({ product }) => {
+  const { id, productName, category, owner } = product;
+
+  return (
+    <tr data-cy="Product">
+      <td className="has-text-weight-bold" data-cy="ProductId">
+        {id}
+      </td>
+
+      <td data-cy="ProductName">
+        {productName}
+      </td>
+      <td data-cy="ProductCategory">
+        <span
+          role="img"
+          aria-label={category.title}
+        >
+          {category.icon}
+        </span>
+        {`- ${category}`}
+      </td>
+
+      <td
+        data-cy="ProductUser"
+        className={cn({
+          'has-text-link': owner.sex === 'm',
+          'has-text-danger': owner.sex === 'f',
+        })}
+      >
+        {owner}
+      </td>
+    </tr>
+  );
+};
+
+const ProductList = ({ productsList }) => (
+  <tbody>
+    {productsList
+      .map(product => <Product product={product} key={product.id} />)}
+  </tbody>
+);
 
 export const App = () => (
   <div className="section">
@@ -59,7 +108,6 @@ export const App = () => (
                 type="text"
                 className="input"
                 placeholder="Search"
-                value="qwe"
               />
 
               <span className="icon is-left">
@@ -191,55 +239,8 @@ export const App = () => (
             </tr>
           </thead>
 
-          <tbody>
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                1
-              </td>
+          <ProductList productsList={products} />
 
-              <td data-cy="ProductName">Milk</td>
-              <td data-cy="ProductCategory">🍺 - Drinks</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Max
-              </td>
-            </tr>
-
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                2
-              </td>
-
-              <td data-cy="ProductName">Bread</td>
-              <td data-cy="ProductCategory">🍞 - Grocery</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-danger"
-              >
-                Anna
-              </td>
-            </tr>
-
-            <tr data-cy="Product">
-              <td className="has-text-weight-bold" data-cy="ProductId">
-                3
-              </td>
-
-              <td data-cy="ProductName">iPhone</td>
-              <td data-cy="ProductCategory">💻 - Electronics</td>
-
-              <td
-                data-cy="ProductUser"
-                className="has-text-link"
-              >
-                Roma
-              </td>
-            </tr>
-          </tbody>
         </table>
       </div>
     </div>
